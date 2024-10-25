@@ -7,6 +7,7 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\TrackController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Middleware\EnsureValidCodeMiddleware;
 
 // Auth
@@ -37,6 +38,16 @@ Route::middleware('auth')->group(function () {
     // Profile
     Route::get('/profile', [ProfileController::class, 'edit'])->name('app.profile.edit');
     Route::post('/profile', [ProfileController::class, 'update'])->name('app.profile.update');
+
+    Route::middleware('auth')->group(function () {
+        Route::get('/categories', [CategoryController::class, 'index'])->name('app.categories.index');
+        Route::get('/categories/create', [CategoryController::class, 'create'])->name('app.categories.create');
+        Route::post('/categories', [CategoryController::class, 'store'])->name('app.categories.store');
+        Route::get('/categories/{category}', [CategoryController::class, 'show'])->name('app.categories.show');
+        Route::get('/categories/{category}/edit', [CategoryController::class, 'edit'])->name('app.categories.edit');
+        Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('app.categories.update');
+        Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('app.categories.destroy');
+    });
 
     Route::fallback(fn () => abort(404));
 });

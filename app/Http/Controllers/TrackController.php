@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Week;
 use App\Models\Track;
 use App\Players\Player;
@@ -18,17 +19,22 @@ class TrackController extends Controller
     /**
      * Show given track.
      */
-    public function show(Request $request, Week $week, Track $track, Player $player): View
+    public function show(Request $request, Week $week, Category $category, Player $player): View
     {
+        // Récupérer toutes les pistes de la catégorie avec pagination
+        $tracks = $category->tracks()->paginate(10); // 10 pistes par page
+
         return view('app.tracks.show', [
             'week' => $week->loadCount('tracks'),
-            'track' => $track->loadCount('likes'),
+            'category' => $category, // Assurez-vous de passer la catégorie
+            'tracks' => $tracks, // Passer les pistes paginées
             'tracks_count' => $week->tracks_count,
-            'position' => $week->getTrackPosition($track),
-            'liked' => $request->user()->likes()->whereTrackId($track->id)->exists(),
-            'embed' => $player->embed($track->player, $track->player_track_id),
+            'position' => $week->getTrackPosition($track), // Il faut définir $track avant
+            'liked' => $request->user()->likes()->whereTrackId($track->id)->exists(), // Il faut définir $track avant
+            'embed' => $player->embed($track->player, $track->player_track_id), // Il faut définir $track avant
         ]);
     }
+
 
     /**
      * Show create track form.
@@ -38,8 +44,10 @@ class TrackController extends Controller
         return view('app.tracks.create', [
             'week' => Week::current(),
             'remaining_tracks_count' => $user->remainingTracksCount(),
+            'categories' => Category::all(), // Récupérer toutes les catégories
         ]);
     }
+
 
     /**
      * Create a new track.
@@ -52,12 +60,14 @@ class TrackController extends Controller
             'title' => ['required', 'string', 'max:255'],
             'artist' => ['required', 'string', 'max:255'],
             'url' => ['required', 'url', new PlayerUrl()],
+            'category_id' => ['required', 'exists:categories,category_id'], // Validation pour category_id
         ]);
 
         DB::beginTransaction();
 
-        // Set track title, artist and url
+        // Set track title, artist, url, and category_id
         $track = new Track($validated);
+        $track->category_id = $validated['category_id']; // Associer la catégorie
 
         // Set track's user + week
         $track->user()->associate($request->user());
@@ -86,6 +96,7 @@ class TrackController extends Controller
             'track' => $track,
         ]);
     }
+
 
     /**
      * Toggle like.

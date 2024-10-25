@@ -3,7 +3,7 @@
 
         <section>
             <h1>
-                {{ $category->name }} <small>{{ trans_choice('tracks.count', $tracks->total()) }}</small>
+                {{ $category->name }} <small>{{ trans_choice('tracks.count', $category->tracks->count()) }}</small>
             </h1>
 
             @if ($tracks->isEmpty())

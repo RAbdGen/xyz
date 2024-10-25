@@ -23,6 +23,7 @@ class Category extends Model
 
     public function tracks()
     {
-        return $this->hasMany(Track::class); // Relation : une catégorie a plusieurs pistes
+        return $this->hasMany(Track::class, 'category_id', 'category_id');
     }
+
 }

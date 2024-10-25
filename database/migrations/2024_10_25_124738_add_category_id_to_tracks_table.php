@@ -12,7 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('tracks', function (Blueprint $table) {
-            //
+            // Ajoute category_id en tant que clé étrangère
+            if (!Schema::hasColumn('tracks', 'category_id')) {
+                $table->foreignId('category_id')->nullable()->constrained('categories', 'category_id')->onDelete('cascade'); // Crée la contrainte de clé étrangère
+            }
         });
     }
 
@@ -22,7 +25,10 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('tracks', function (Blueprint $table) {
-            //
+            if (Schema::hasColumn('tracks', 'category_id')) {
+                $table->dropForeign(['category_id']); // Supprime la contrainte de clé étrangère
+                $table->dropColumn('category_id'); // Supprime la colonne category_id
+            }
         });
     }
 };
